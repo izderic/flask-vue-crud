@@ -87,14 +87,22 @@ def single_book(book_id):
         response_object['book'] = return_book
     if request.method == 'PUT':
         post_data = request.get_json()
-        remove_book(book_id)
-        BOOKS.append({
-            'id': uuid.uuid4().hex,
-            'title': post_data.get('title'),
-            'author': post_data.get('author'),
-            'read': post_data.get('read'),
-            'price': post_data.get('price')
-        })
+        title = post_data['title']
+        author = post_data['author']
+
+        # Check if other book with the same title and author exists.
+        for book in BOOKS:
+            if book_id != book['id'] and book['title'] == title and book['author'] == author:
+                resp = jsonify({'status': 'error', 'message': 'Book with title %s and author %s already exists' % (title, author)})
+                resp.status_code = 404
+                return resp
+
+        # Update the book data.
+        for book in BOOKS:
+            if book_id == book['id']:
+                book.update(post_data)
+                break
+
         response_object['message'] = 'Book updated!'
     if request.method == 'DELETE':
         remove_book(book_id)

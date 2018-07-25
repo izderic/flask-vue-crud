@@ -9,49 +9,51 @@
         <button type="button" class="btn btn-success btn-sm" v-b-modal.book-modal>Add Book</button>
         <br><br>
 
-        <!-- books table -->
-        <table class="table table-hover">
-          <thead>
-          <tr>
-            <th scope="col">Title</th>
-            <th scope="col">Author</th>
-            <th scope="col">Read?</th>
-            <th scope="col">Purchase Price</th>
-            <th></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="(book, index) in books" :key="index">
-            <td>{{ book.title }}</td>
-            <td>{{ book.author }}</td>
-            <td>
-              <span v-if="book.read">Yes</span>
-              <span v-else>No</span>
-            </td>
-            <td>${{ book.price }}</td>
-            <td>
-              <button type="button"
-                      class="btn btn-warning btn-sm"
-                      v-b-modal.book-update-modal
-                      @click="editBook(book)">
-                Update
+        <template v-if="books.length">
+          <!-- books table -->
+          <table class="table table-hover">
+            <thead>
+            <tr>
+              <th scope="col">Title</th>
+              <th scope="col">Author</th>
+              <th scope="col">Read?</th>
+              <th scope="col">Purchase Price</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(book, index) in books" :key="index">
+              <td>{{ book.title }}</td>
+              <td>{{ book.author }}</td>
+              <td>
+                <span v-if="book.read">Yes</span>
+                <span v-else>No</span>
+              </td>
+              <td>${{ book.price }}</td>
+              <td>
+                <button type="button"
+                        class="btn btn-warning btn-sm"
+                        v-b-modal.book-update-modal
+                        @click="editBook(book)">
+                  Update
 
-              </button>
-              <button type="button"
-                      class="btn btn-danger btn-sm"
-                      @click="onDeleteBook(book)">
-                Delete
+                </button>
+                <button type="button"
+                        class="btn btn-danger btn-sm"
+                        @click="onDeleteBook(book)">
+                  Delete
+                </button>
+                <router-link :to="`/order/${book.id}`"
+                             class="btn btn-primary btn-sm">
+                  Purchase
 
-              </button>
-              <router-link :to="`/order/${book.id}`"
-                           class="btn btn-primary btn-sm">
-                Purchase
-
-              </router-link>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+                </router-link>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </template>
+        <template v-else>No books at the momemt.</template>
 
       </div>
     </div>
@@ -107,6 +109,7 @@
              id="book-update-modal"
              title="Update"
              hide-footer>
+      <alert :message=modalMessage variant="danger" v-if="modalMessage"></alert>
       <b-form @submit="onSubmitUpdate" @reset="onResetUpdate" class="w-100">
         <b-form-group id="form-title-edit-group"
                       label="Title:"
@@ -210,10 +213,10 @@ export default {
         .then(() => {
           this.getBooks();
           this.message = 'Book updated!';
+          this.$refs.addBookModal.hide();
         })
         .catch((error) => {
-          // eslint-disable-next-line
-          console.error(error);
+          this.modalMessage = error.response.data.message;
           this.getBooks();
         });
     },
@@ -256,7 +259,6 @@ export default {
     },
     onSubmitUpdate(evt) {
       evt.preventDefault();
-      this.$refs.editBookModal.hide();
       let read = false;
       if (this.editForm.read[0]) read = true;
       const payload = {
@@ -281,7 +283,11 @@ export default {
       this.removeBook(book.id);
     },
     editBook(book) {
-      this.editForm = book;
+      this.editForm.id = book.id;
+      this.editForm.title = book.title;
+      this.editForm.author = book.author;
+      this.editForm.read = book.read;
+      this.editForm.price = book.price;
     },
   },
   created() {
