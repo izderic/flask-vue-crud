@@ -52,6 +52,16 @@ def all_books():
     response_object = {'status': 'success'}
     if request.method == 'POST':
         post_data = request.get_json()
+
+        title = post_data['title']
+        author = post_data['author']
+
+        for book in BOOKS:
+            if book['title'] == title and book['author'] == author:
+                resp = jsonify({'status': 'error', 'message': 'Book with title %s and author %s already exists' % (title, author)})
+                resp.status_code = 404
+                return resp
+
         BOOKS.append({
             'id': uuid.uuid4().hex,
             'title': post_data.get('title'),
