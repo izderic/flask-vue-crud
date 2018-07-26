@@ -41,6 +41,31 @@ BOOKS = [
 ]
 
 
+# Utils
+
+def find_book(book_id):
+    book_filter = list(filter(lambda book: book['id'] == book_id, BOOKS))
+    if book_filter:
+        return book_filter[0]
+
+
+def book_exists(title, author, book_id=None):
+    for book in BOOKS:
+        if (book_id is None or book_id != book['id']) and book['title'] == title and book['author'] == author:
+            return True
+    return False
+
+
+def remove_book(book_id):
+    for book in BOOKS:
+        if book['id'] == book_id:
+            BOOKS.remove(book)
+            return True
+    return False
+
+
+# Routes
+
 # sanity check route
 @app.route('/ping', methods=['GET'])
 def ping_pong():
@@ -77,12 +102,7 @@ def all_books():
 def single_book(book_id):
     response_object = {'status': 'success'}
     if request.method == 'GET':
-        # TODO: refactor to a lambda and filter
-        return_book = ''
-        for book in BOOKS:
-            if book['id'] == book_id:
-                return_book = book
-        response_object['book'] = return_book
+        response_object['book'] = find_book(book_id)
     if request.method == 'PUT':
         post_data = request.get_json()
         title = post_data['title']
@@ -103,13 +123,6 @@ def single_book(book_id):
         remove_book(book_id)
         response_object['message'] = 'Book removed!'
     return jsonify(response_object)
-
-
-def book_exists(title, author, book_id=None):
-    for book in BOOKS:
-        if (book_id is None or book_id != book['id']) and book['title'] == title and book['author'] == author:
-            return True
-    return False
 
 
 @app.route('/charge', methods=['POST'])
@@ -138,14 +151,6 @@ def get_charge(charge_id):
         'charge': stripe.Charge.retrieve(charge_id)
     }
     return jsonify(response_object), 200
-
-
-def remove_book(book_id):
-    for book in BOOKS:
-        if book['id'] == book_id:
-            BOOKS.remove(book)
-            return True
-    return False
 
 
 if __name__ == '__main__':
