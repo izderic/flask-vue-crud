@@ -56,11 +56,9 @@ def all_books():
         title = post_data['title']
         author = post_data['author']
 
-        for book in BOOKS:
-            if book['title'] == title and book['author'] == author:
-                resp = jsonify({'status': 'error', 'message': 'Book with title %s and author %s already exists' % (title, author)})
-                resp.status_code = 404
-                return resp
+        # Check if other book with the same title and author exists.
+        if book_exists(title, author):
+            return jsonify({'status': 'error', 'message': 'Book with title %s and author %s already exists' % (title, author)}), 404
 
         BOOKS.append({
             'id': uuid.uuid4().hex,
@@ -91,11 +89,8 @@ def single_book(book_id):
         author = post_data['author']
 
         # Check if other book with the same title and author exists.
-        for book in BOOKS:
-            if book_id != book['id'] and book['title'] == title and book['author'] == author:
-                resp = jsonify({'status': 'error', 'message': 'Book with title %s and author %s already exists' % (title, author)})
-                resp.status_code = 404
-                return resp
+        if book_exists(title, author, book_id=book_id):
+            return jsonify({'status': 'error', 'message': 'Book with title %s and author %s already exists' % (title, author)}), 404
 
         # Update the book data.
         for book in BOOKS:
@@ -108,6 +103,13 @@ def single_book(book_id):
         remove_book(book_id)
         response_object['message'] = 'Book removed!'
     return jsonify(response_object)
+
+
+def book_exists(title, author, book_id=None):
+    for book in BOOKS:
+        if (book_id is None or book_id != book['id']) and book['title'] == title and book['author'] == author:
+            return True
+    return False
 
 
 @app.route('/charge', methods=['POST'])
