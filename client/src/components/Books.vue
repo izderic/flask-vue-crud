@@ -11,7 +11,7 @@
 
         <template v-if="books.length">
           <!-- books table -->
-          <table class="table table-hover">
+          <table class="table table-hover table-bordered">
             <thead>
             <tr>
               <th scope="col">Title</th>
@@ -213,7 +213,7 @@ export default {
         .then(() => {
           this.getBooks();
           this.message = 'Book updated!';
-          this.$refs.addBookModal.hide();
+          this.$refs.editBookModal.hide();
         })
         .catch((error) => {
           this.modalMessage = error.response.data.message;
