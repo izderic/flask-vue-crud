@@ -40,9 +40,10 @@
                 </button>
                 <button type="button"
                         class="btn btn-danger btn-sm"
-                        @click="onDeleteBook(book)">
+                        @click="showDeleteModal(book)">
                   Delete
                 </button>
+
                 <router-link :to="`/order/${book.id}`"
                              class="btn btn-primary btn-sm">
                   Purchase
@@ -150,6 +151,18 @@
         <b-button type="reset" variant="danger">Cancel</b-button>
       </b-form>
     </b-modal>
+
+    <b-modal ref="dialogModal"
+           id="dialog-modal"
+           title="Are you sure you want to delete this book?"
+           hide-footer>
+      <b-form class="w-100">
+        <b-button type="submit" variant="primary" @click="onDeleteBook(bookToDelete)">
+          Yes</b-button>
+        <b-button type="reset" variant="danger" @click="hideDeleteModal">No</b-button>
+      </b-form>
+    </b-modal>
+
   </div>
 </template>
 
@@ -176,6 +189,7 @@ export default {
       },
       message: '',
       modalMessage: '',
+      bookToDelete: '',
     };
   },
   components: {
@@ -281,6 +295,7 @@ export default {
     },
     onDeleteBook(book) {
       this.removeBook(book.id);
+      this.$refs.dialogModal.hide();
     },
     editBook(book) {
       this.editForm.id = book.id;
@@ -288,6 +303,13 @@ export default {
       this.editForm.author = book.author;
       this.editForm.read = book.read;
       this.editForm.price = book.price;
+    },
+    showDeleteModal(book) {
+      this.$refs.dialogModal.show();
+      this.bookToDelete = book;
+    },
+    hideDeleteModal() {
+      this.$refs.dialogModal.hide();
     },
   },
   created() {
