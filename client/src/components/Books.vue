@@ -11,7 +11,7 @@
 
         <template v-if="books.length">
           <!-- books table -->
-          <table class="table table-hover table-bordered">
+          <table id="books-table" class="table table-hover table-bordered table-dark">
             <thead>
             <tr>
               <th scope="col">Title</th>
@@ -32,20 +32,20 @@
               <td>${{ book.price }}</td>
               <td>
                 <button type="button"
-                        class="btn btn-warning btn-sm"
+                        class="btn btn-warning btn-sm mt-1"
                         v-b-modal.book-update-modal
                         @click="editBook(book)">
                   Update
 
                 </button>
                 <button type="button"
-                        class="btn btn-danger btn-sm"
+                        class="btn btn-danger btn-sm mt-1"
                         @click="showDeleteModal(book)">
                   Delete
                 </button>
 
                 <router-link :to="`/order/${book.id}`"
-                             class="btn btn-primary btn-sm">
+                             class="btn btn-primary btn-sm mt-1">
                   Purchase
 
                 </router-link>
@@ -317,3 +317,7 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  #books-table th {color: greenyellow;}
+</style>

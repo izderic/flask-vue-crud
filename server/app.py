@@ -37,6 +37,20 @@ BOOKS = [
         'author': 'Dr. Seuss',
         'read': True,
         'price': '3.99'
+    },
+    {
+        'id': uuid.uuid4().hex,
+        'title': 'Clean Code',
+        'author': 'Robert C. Martin',
+        'read': False,
+        'price': '39.99'
+    },
+    {
+        'id': uuid.uuid4().hex,
+        'title': 'Django by Example',
+        'author': 'Antonio Melé',
+        'read': True,
+        'price': '44.99'
     }
 ]
 
