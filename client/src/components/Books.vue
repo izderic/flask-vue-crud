@@ -152,16 +152,11 @@
       </b-form>
     </b-modal>
 
-    <b-modal ref="dialogModal"
-           id="dialog-modal"
-           title="Are you sure you want to delete this book?"
-           hide-footer>
-      <b-form class="w-100">
-        <b-button type="submit" variant="primary" @click="onDeleteBook(bookToDelete)">
-          Yes</b-button>
-        <b-button type="reset" variant="danger" @click="hideDeleteModal">No</b-button>
-      </b-form>
-    </b-modal>
+    <prompt
+      ref="prompt"
+      v-on:yes="onDeleteBook(bookToDelete)"
+      message="Are you sure you want to delete this book?">
+    </prompt>
 
   </div>
 </template>
@@ -169,6 +164,7 @@
 <script>
 import axios from 'axios';
 import Alert from './Alert';
+import Prompt from './Prompt';
 
 export default {
   data() {
@@ -194,6 +190,7 @@ export default {
   },
   components: {
     alert: Alert,
+    prompt: Prompt,
   },
   methods: {
     getBooks() {
@@ -295,7 +292,7 @@ export default {
     },
     onDeleteBook(book) {
       this.removeBook(book.id);
-      this.$refs.dialogModal.hide();
+      this.$refs.prompt.$refs.promptModal.hide();
     },
     editBook(book) {
       this.editForm.id = book.id;
@@ -305,11 +302,8 @@ export default {
       this.editForm.price = book.price;
     },
     showDeleteModal(book) {
-      this.$refs.dialogModal.show();
+      this.$refs.prompt.show();
       this.bookToDelete = book;
-    },
-    hideDeleteModal() {
-      this.$refs.dialogModal.hide();
     },
   },
   created() {
