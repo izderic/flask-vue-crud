@@ -2,20 +2,21 @@
   <div>
     <b-modal ref="promptModal"
            id="prompt-modal"
-           :title="message"
+           :title="title"
            hide-footer>
-      <b-form class="w-100">
-        <b-button type="submit" variant="primary" @click="handleYes">
-          Yes</b-button>
-        <b-button type="reset" variant="danger" @click="handleNo">No</b-button>
-      </b-form>
+      <div class="d-block text-center">
+        {{ message }}
+      </div>
+      <b-button class="mt-3" type="submit" variant="primary" @click="handleYes">
+        Yes</b-button>
+      <b-button class="mt-3" type="reset" variant="danger" @click="handleNo">No</b-button>
     </b-modal>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['message'],
+  props: ['title', 'message'],
   methods: {
     handleYes() {
       this.$emit('yes');

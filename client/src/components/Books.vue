@@ -155,6 +155,7 @@
     <prompt
       ref="prompt"
       v-on:yes="onDeleteBook(bookToDelete)"
+      title="Warning"
       message="Are you sure you want to delete this book?">
     </prompt>
 
@@ -292,7 +293,7 @@ export default {
     },
     onDeleteBook(book) {
       this.removeBook(book.id);
-      this.$refs.prompt.$refs.promptModal.hide();
+      this.$refs.prompt.hide();
     },
     editBook(book) {
       this.editForm.id = book.id;
