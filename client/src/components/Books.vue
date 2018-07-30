@@ -6,7 +6,8 @@
         <hr>
         <br><br>
         <alert :message=message variant="success" v-if="message"></alert>
-        <button type="button" class="btn btn-success btn-sm" v-b-modal.book-modal>Add Book</button>
+        <button type="button" class="btn btn-success btn-sm"
+                @click="showBookModal">Add Book</button>
         <br><br>
 
         <template v-if="books.length">
@@ -33,7 +34,6 @@
               <td>
                 <button type="button"
                         class="btn btn-warning btn-sm mt-1"
-                        v-b-modal.book-update-modal
                         @click="editBook(book)">
                   Update
 
@@ -59,10 +59,10 @@
       </div>
     </div>
 
-    <!-- add book modal -->
-    <b-modal ref="addBookModal"
+    <!-- add/edit book modal -->
+    <b-modal ref="bookModal"
              id="book-modal"
-             title="Add a new book"
+             :title="bookModalTitle"
              hide-footer>
       <alert :message=modalMessage variant="danger" v-if="modalMessage"></alert>
       <b-form @submit="onSubmit" @reset="onReset" class="w-100">
@@ -71,7 +71,7 @@
                       label-for="form-title-input">
           <b-form-input id="form-title-input"
                         type="text"
-                        v-model="addBookForm.title"
+                        v-model="bookForm.title"
                         required
                         placeholder="Enter title">
           </b-form-input>
@@ -81,7 +81,7 @@
                       label-for="form-author-input">
           <b-form-input id="form-author-input"
                         type="text"
-                        v-model="addBookForm.author"
+                        v-model="bookForm.author"
                         required
                         placeholder="Enter author">
           </b-form-input>
@@ -91,67 +91,30 @@
                       label-for="form-price-input">
           <b-form-input id="form-price-input"
                         type="number"
-                        v-model="addBookForm.price"
+                        v-model="bookForm.price"
                         required
                         placeholder="Enter price">
           </b-form-input>
         </b-form-group>
         <b-form-group id="form-read-group">
-          <b-form-checkbox-group v-model="addBookForm.read" id="form-checks">
+          <b-form-checkbox-group v-model="bookForm.read" id="form-checks">
             <b-form-checkbox value="true">Read?</b-form-checkbox>
           </b-form-checkbox-group>
         </b-form-group>
-        <b-button type="submit" variant="primary">Submit</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
+
+        <b-button type="submit" variant="primary">
+          <template v-if="bookForm.id">Update</template>
+          <template v-else>Submit</template>
+        </b-button>
+        <b-button type="reset" variant="danger">
+          <template v-if="bookForm.id">Cancel</template>
+          <template v-else>Reset</template>
+        </b-button>
+
       </b-form>
     </b-modal>
 
-    <b-modal ref="editBookModal"
-             id="book-update-modal"
-             title="Update"
-             hide-footer>
-      <alert :message=modalMessage variant="danger" v-if="modalMessage"></alert>
-      <b-form @submit="onSubmitUpdate" @reset="onResetUpdate" class="w-100">
-        <b-form-group id="form-title-edit-group"
-                      label="Title:"
-                      label-for="form-title-edit-input">
-          <b-form-input id="form-title-edit-input"
-                        type="text"
-                        v-model="editForm.title"
-                        required
-                        placeholder="Enter title">
-          </b-form-input>
-        </b-form-group>
-        <b-form-group id="form-author-edit-group"
-                      label="Author:"
-                      label-for="form-author-edit-input">
-          <b-form-input id="form-author-edit-input"
-                        type="text"
-                        v-model="editForm.author"
-                        required
-                        placeholder="Enter author">
-          </b-form-input>
-        </b-form-group>
-        <b-form-group id="form-price-edit-group"
-                      label="Purchase price:"
-                      label-for="form-price-edit-input">
-          <b-form-input id="form-price-edit-input"
-                        type="number"
-                        v-model="editForm.price"
-                        required
-                        placeholder="Enter price">
-          </b-form-input>
-        </b-form-group>
-        <b-form-group id="form-read-edit-group">
-          <b-form-checkbox-group v-model="editForm.read" id="form-checks">
-            <b-form-checkbox value="true">Read?</b-form-checkbox>
-          </b-form-checkbox-group>
-        </b-form-group>
-        <b-button type="submit" variant="primary">Update</b-button>
-        <b-button type="reset" variant="danger">Cancel</b-button>
-      </b-form>
-    </b-modal>
-
+    <!--delete book modal-->
     <prompt
       ref="prompt"
       v-on:yes="onDeleteBook(bookToDelete)"
@@ -171,13 +134,7 @@ export default {
   data() {
     return {
       books: [],
-      addBookForm: {
-        title: '',
-        author: '',
-        read: [],
-        price: '',
-      },
-      editForm: {
+      bookForm: {
         id: '',
         title: '',
         author: '',
@@ -192,6 +149,11 @@ export default {
   components: {
     alert: Alert,
     prompt: Prompt,
+  },
+  computed: {
+    bookModalTitle() {
+      return this.bookForm.id ? 'Update' : 'Add a new book';
+    },
   },
   methods: {
     getBooks() {
@@ -211,7 +173,7 @@ export default {
         .then(() => {
           this.getBooks();
           this.message = 'Book added!';
-          this.$refs.addBookModal.hide();
+          this.$refs.bookModal.hide();
           this.initForm();
         })
         .catch((error) => {
@@ -225,7 +187,8 @@ export default {
         .then(() => {
           this.getBooks();
           this.message = 'Book updated!';
-          this.$refs.editBookModal.hide();
+          this.$refs.bookModal.hide();
+          this.initForm();
         })
         .catch((error) => {
           this.modalMessage = error.response.data.message;
@@ -246,65 +209,54 @@ export default {
         });
     },
     initForm() {
-      this.addBookForm.title = '';
-      this.addBookForm.author = '';
-      this.addBookForm.read = [];
-      this.addBookForm.price = '';
-      this.editForm.id = '';
-      this.editForm.title = '';
-      this.editForm.author = '';
-      this.editForm.read = [];
-      this.editForm.id = '';
+      this.bookForm.id = '';
+      this.bookForm.title = '';
+      this.bookForm.author = '';
+      this.bookForm.read = [];
+      this.bookForm.price = '';
       this.modalMessage = '';
     },
     onSubmit(evt) {
       evt.preventDefault();
       let read = false;
-      if (this.addBookForm.read[0]) read = true;
+      if (this.bookForm.read[0]) read = true;
       const payload = {
-        title: this.addBookForm.title,
-        author: this.addBookForm.author,
+        title: this.bookForm.title,
+        author: this.bookForm.author,
         read, // property shorthand
-        price: this.addBookForm.price,
+        price: this.bookForm.price,
       };
-      this.addBook(payload);
-    },
-    onSubmitUpdate(evt) {
-      evt.preventDefault();
-      let read = false;
-      if (this.editForm.read[0]) read = true;
-      const payload = {
-        title: this.editForm.title,
-        author: this.editForm.author,
-        read, // property shorthand
-        price: this.editForm.price,
-      };
-      this.updateBook(payload, this.editForm.id);
+      if (this.bookForm.id) {
+        this.updateBook(payload, this.bookForm.id);
+      } else {
+        this.addBook(payload);
+      }
     },
     onReset(evt) {
       evt.preventDefault();
+      this.$refs.bookModal.hide();
       this.initForm();
-    },
-    onResetUpdate(evt) {
-      evt.preventDefault();
-      this.$refs.editBookModal.hide();
-      this.initForm();
-      this.getBooks(); // why?
+      this.getBooks();
     },
     onDeleteBook(book) {
       this.removeBook(book.id);
       this.$refs.prompt.hide();
     },
     editBook(book) {
-      this.editForm.id = book.id;
-      this.editForm.title = book.title;
-      this.editForm.author = book.author;
-      this.editForm.read = book.read;
-      this.editForm.price = book.price;
+      this.bookForm.id = book.id;
+      this.bookForm.title = book.title;
+      this.bookForm.author = book.author;
+      this.bookForm.read = book.read;
+      this.bookForm.price = book.price;
+      this.$refs.bookModal.show();
     },
     showDeleteModal(book) {
       this.$refs.prompt.show();
       this.bookToDelete = book;
+    },
+    showBookModal() {
+      this.initForm();
+      this.$refs.bookModal.show();
     },
   },
   created() {
