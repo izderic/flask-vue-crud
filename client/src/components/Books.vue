@@ -119,7 +119,7 @@
       ref="prompt"
       v-on:yes="onDeleteBook(bookToDelete)"
       title="Warning"
-      message="Are you sure you want to delete this book?">
+      :message="deleteModalMessage">
     </prompt>
 
   </div>
@@ -129,6 +129,8 @@
 import axios from 'axios';
 import Alert from './Alert';
 import Prompt from './Prompt';
+
+const BOOKS_URL = 'http://localhost:5000/books';
 
 export default {
   data() {
@@ -154,11 +156,13 @@ export default {
     bookModalTitle() {
       return this.bookForm.id ? 'Update' : 'Add a new book';
     },
+    deleteModalMessage() {
+      return `Are you sure you want to delete book ${this.bookToDelete.title}?`;
+    },
   },
   methods: {
     getBooks() {
-      const path = 'http://localhost:5000/books';
-      axios.get(path)
+      axios.get(BOOKS_URL)
         .then((res) => {
           this.books = res.data.books;
         })
@@ -168,8 +172,7 @@ export default {
         });
     },
     addBook(payload) {
-      const path = 'http://localhost:5000/books';
-      axios.post(path, payload)
+      axios.post(BOOKS_URL, payload)
         .then(() => {
           this.getBooks();
           this.message = 'Book added!';
@@ -182,7 +185,7 @@ export default {
         });
     },
     updateBook(payload, bookID) {
-      const path = `http://localhost:5000/books/${bookID}`;
+      const path = `${BOOKS_URL}/${bookID}`;
       axios.put(path, payload)
         .then(() => {
           this.getBooks();
@@ -196,7 +199,7 @@ export default {
         });
     },
     removeBook(bookID) {
-      const path = `http://localhost:5000/books/${bookID}`;
+      const path = `${BOOKS_URL}/${bookID}`;
       axios.delete(path)
         .then(() => {
           this.getBooks();
@@ -251,8 +254,8 @@ export default {
       this.$refs.bookModal.show();
     },
     showDeleteModal(book) {
-      this.$refs.prompt.show();
       this.bookToDelete = book;
+      this.$refs.prompt.show();
     },
     showBookModal() {
       this.initForm();
