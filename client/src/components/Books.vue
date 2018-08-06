@@ -27,8 +27,11 @@
               <td>{{ book.title }}</td>
               <td>{{ book.author }}</td>
               <td>
-                <span v-if="book.read">Yes</span>
-                <span v-else>No</span>
+                <input
+                  title="Is read?"
+                  type="checkbox"
+                  v-model="book.read"
+                  v-on:change="onReadChange({read: book.read}, book.id)"/>
               </td>
               <td>${{ book.price }}</td>
               <td>
@@ -260,6 +263,14 @@ export default {
     showBookModal() {
       this.initForm();
       this.$refs.bookModal.show();
+    },
+    onReadChange(payload, bookID) {
+      const path = `${BOOKS_URL}/${bookID}`;
+      axios.put(path, payload)
+        .catch((error) => {
+          this.modalMessage = error.response.data.message;
+          this.getBooks();
+        });
     },
   },
   created() {

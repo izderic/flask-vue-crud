@@ -119,11 +119,12 @@ def single_book(book_id):
         response_object['book'] = find_book(book_id)
     if request.method == 'PUT':
         post_data = request.get_json()
-        title = post_data['title']
-        author = post_data['author']
+
+        title = post_data.get('title')
+        author = post_data.get('author')
 
         # Check if other book with the same title and author exists.
-        if book_exists(title, author, book_id=book_id):
+        if title and author and book_exists(title, author, book_id=book_id):
             return jsonify({'status': 'error', 'message': 'Book with title %s and author %s already exists' % (title, author)}), 404
 
         # Update the book data.
